@@ -32,3 +32,11 @@ class User(Base):
         back_populates="providers",
         lazy="selectin"
     )
+
+     # One-to-many with Service (IMPORTANT)
+    services = relationship(
+        "Service",
+        back_populates="provider",
+        lazy="selectin"
+    )
+

@@ -4,6 +4,7 @@ from app.api.routes import auth
 from app.api.routes import admin as admin_router
 from app.api.routes import provider as provider_router
 from app.api.routes import category as category_router
+from app.api.routes import services as services_router
 
 app = FastAPI()
 
@@ -20,3 +21,4 @@ app.include_router(auth.router, prefix="/api/auth")
 app.include_router(admin_router.router)
 app.include_router(provider_router.router)
 app.include_router(category_router.router)
+app.include_router(services_router.router)

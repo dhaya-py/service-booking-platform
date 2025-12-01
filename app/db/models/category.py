@@ -16,3 +16,10 @@ class Category(Base):
         back_populates="categories",
         lazy="selectin"
     )
+
+    services = relationship(
+    "Service",
+    back_populates="category",
+    lazy="selectin"
+    )
+
