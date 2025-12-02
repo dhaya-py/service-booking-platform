@@ -54,6 +54,42 @@ def create_booking(
     return new_booking
 
 
+
+# Customer cancels booking
+
+@router.post("/{booking_id}/cancel", response_model=BookingResponse)
+def cancel_booking(
+    booking_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role != "customer":
+        raise HTTPException(status_code=403, detail="Customers only")
+
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    if booking.customer_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your booking")
+
+    # Rule 1: Only pending bookings can be canceled
+    if booking.status != "pending":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot cancel booking because it is already {booking.status}",
+        )
+
+    booking.status = "canceled"
+
+    db.commit()
+    db.refresh(booking)
+
+    return booking
+
+
+    
 # Provider views their bookings
 
 @router.get("/provider/me", response_model=list[BookingResponse])
@@ -151,3 +187,7 @@ def complete_booking(
     db.commit()
     db.refresh(booking)
     return booking
+
+
+
+
