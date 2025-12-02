@@ -89,7 +89,25 @@ def cancel_booking(
     return booking
 
 
-    
+
+# Customer views their bookings
+
+@router.get("/customer/me", response_model=list[BookingResponse])
+def customer_my_bookings(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role != "customer":
+        raise HTTPException(status_code=403, detail="Customers only")
+
+    bookings = db.query(Booking).filter(
+        Booking.customer_id == current_user.id
+    ).order_by(Booking.created_at.desc()).all()
+
+    return bookings
+
+
+
 # Provider views their bookings
 
 @router.get("/provider/me", response_model=list[BookingResponse])
@@ -191,3 +209,16 @@ def complete_booking(
 
 
 
+# Admin views all bookings
+
+@router.get("/admin/all", response_model=list[BookingResponse])
+def admin_all_bookings(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    bookings = db.query(Booking).order_by(Booking.created_at.desc()).all()
+
+    return bookings
