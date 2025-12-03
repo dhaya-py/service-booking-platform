@@ -18,4 +18,4 @@ def get_db():
 
 
 # IMPORTANT: import models so they register with Base
-from app.db.models import user, category, service, booking
+from app.db.models import user, category, service, booking, review
