@@ -40,3 +40,8 @@ class User(Base):
         lazy="selectin"
     )
 
+    # relationships already present: services, categories, etc.
+    availabilities = relationship("ProviderAvailability", back_populates="provider", lazy="selectin")
+    timeoffs = relationship("ProviderTimeOff", back_populates="provider", lazy="selectin")
+
+

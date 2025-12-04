@@ -7,6 +7,7 @@ from app.api.routes import category as category_router
 from app.api.routes import services as services_router
 from app.api.routes import bookings as bookings_router
 from app.api.routes import review as review_router
+from app.api.routes import availability as availability_router
 
 
 app = FastAPI()
@@ -27,3 +28,4 @@ app.include_router(category_router.router)
 app.include_router(services_router.router)
 app.include_router(bookings_router.router)
 app.include_router(review_router.router)
+app.include_router(availability_router.router)

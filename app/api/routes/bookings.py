@@ -9,6 +9,10 @@ from app.db.models.user import User
 from app.schemas.booking import BookingCreate, BookingResponse
 from app.core.security import get_current_user
 
+from datetime import datetime, timedelta
+from app.db.models.availability import ProviderAvailability, ProviderTimeOff
+from app.api.routes.availability import is_blocked_by_timeoff, overlaps, get_provider_bookings_on_date, is_blocked_by_timeoff
+
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
 # Customer creates booking
@@ -34,6 +38,47 @@ def create_booking(
     ).first()
     if not provider:
         raise HTTPException(status_code=404, detail="Provider not found")
+
+
+    # inside create_booking, after validating service and provider:
+
+    weekday = booking.booking_date.weekday() + 1
+
+    # validate requested slot against availability/duration/conflicts
+    requested_start = datetime.combine(booking.booking_date, booking.booking_time)
+    requested_end = requested_start + timedelta(minutes=service.duration_minutes)
+
+    # 1) check provider has weekly availability that contains this slot
+    
+    avail_windows = db.query(ProviderAvailability).filter(
+        ProviderAvailability.provider_id == booking.provider_id,
+        ProviderAvailability.weekday == weekday,
+        ProviderAvailability.is_active == True
+    ).all()
+    if not avail_windows:
+        raise HTTPException(status_code=400, detail="Provider has no availability on this day")
+
+    # ensure at least one window fully contains the requested slot
+    ok_window = False
+    for w in avail_windows:
+        window_start = datetime.combine(booking.booking_date, w.start_time)
+        window_end = datetime.combine(booking.booking_date, w.end_time)
+        if requested_start >= window_start and requested_end <= window_end:
+            ok_window = True
+            break
+    if not ok_window:
+        raise HTTPException(status_code=400, detail="Requested time is outside provider availability")
+
+    # 2) check conflict with existing bookings
+    existing = get_provider_bookings_on_date(db, booking.provider_id, booking.booking_date)
+    for b_start, b_end in existing:
+        if overlaps(b_start, b_end, requested_start, requested_end):
+            raise HTTPException(status_code=400, detail="Requested time overlaps an existing booking")
+
+    # 3) check provider timeoffs
+    if is_blocked_by_timeoff(db, booking.provider_id, requested_start, requested_end):
+        raise HTTPException(status_code=400, detail="Requested time falls during provider time off")
+
 
     # Step 4: Create booking
     new_booking = Booking(
