@@ -1,5 +1,5 @@
 # app/db/models/user.py
-from sqlalchemy import Column, Integer, String, Table, ForeignKey
+from sqlalchemy import Column, Float, Integer, String, Table, ForeignKey
 from sqlalchemy.orm import relationship
 from app.db.base import Base
 
@@ -23,6 +23,9 @@ class User(Base):
     phone = Column(String, nullable=True)
     address = Column(String, nullable=True)
     description = Column(String, nullable=True)
+
+    avg_rating = Column(Float, nullable=True, default=0)
+    rating_count = Column(Integer, nullable=True, default=0)
 
 
     # if this user is a provider, this relationship links to categories
