@@ -8,6 +8,7 @@ from app.api.routes import services as services_router
 from app.api.routes import bookings as bookings_router
 from app.api.routes import review as review_router
 from app.api.routes import availability as availability_router
+from app.api.routes import providers_dashboard as providers_dashboard_router
 
 
 app = FastAPI()
@@ -29,3 +30,4 @@ app.include_router(services_router.router)
 app.include_router(bookings_router.router)
 app.include_router(review_router.router)
 app.include_router(availability_router.router)
+app.include_router(providers_dashboard_router.router)
