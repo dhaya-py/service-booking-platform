@@ -229,5 +229,5 @@ def admin_summary(db: Session = Depends(get_db), current_user: User = Depends(ge
         total_providers=int(total_providers),
         total_services=int(total_services),
         total_bookings=int(total_bookings),
-        bookings_last_7=int(bookings_last_7),
+        bookings_last_7_days=int(bookings_last_7),
     )
